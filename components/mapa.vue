@@ -1,7 +1,6 @@
 <template lang="pug">
-.paginaIndex
-  h1 mapa
-  Mapa
+.mapa
+	unSVG(tipo="mapa")
 </template>
 <script>
 export default {

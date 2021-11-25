@@ -1,0 +1,18 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"activityBar.background": "#094c68",
+			"activityBar.foreground": "#dbf87b",
+			"titleBar.activeBackground": "#0e8974",
+			"titleBar.activeForeground": "#FFFFFF"
+		},
+		"gitlens.currentLine.enabled": true,
+		"gitlens.hovers.currentLine.over": "line",
+		"window.title": "${folderName}@${rootName}${separator}${activeEditorShort}"
+	}
+}

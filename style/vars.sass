@@ -1,0 +1,37 @@
+
+// ------------------------
+// Colores asociados a vars
+// ------------------------
+
+// FUENTES
+$fzNum: 16
+$rem: var(--fontsize, $fzNum+px)
+$fontsize: var(--fontsize, $fzNum+px)
+
+$fuenteFallback: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !default
+$fuente: 'DM Sans', $fuenteFallback !default
+$fuenteTitulos: $fuente
+
+$brad: 0.25rem
+$radio: 9px !default
+$radioS: 3px !default
+$radioM: 9px !default
+$radioMd: 12px !default
+$radioL: 15px !default
+$radioXL: 25px !default
+
+// Estilos movil y PC
+//  0 a 425 = movil
+//  425 a 768 = tablet
+//  768 a x = desktop
+
+$anchoLimiteMobile: 425px
+$anchoLimiteTablet: 768px
+$anchoLimiteLaptop: 1024px
+
+// $minimovil: "(max-width: #{$anchoLimiteMobile})"
+$movil: "(max-width: #{$anchoLimiteMobile})"
+$tablet: "(min-width: #{$anchoLimiteMobile}) and (max-width: #{$anchoLimiteLaptop})"
+$compu: "(min-width: #{$anchoLimiteLaptop})"
+
+@import "mixins"

@@ -1,0 +1,106 @@
+
+=fzxxs
+	font-size: (10/$fzNum) * 1em
+=fzxs
+	font-size: (12/$fzNum) * 1em
+=fzs
+	font-size: (13/$fzNum) * 1em
+=fz
+	font-size: (14/$fzNum) * 1em
+=fzm
+	font-size: (15/$fzNum) * 1em
+=fzl
+	font-size: (17/$fzNum) * 1em
+=fzxl
+	font-size: (20/$fzNum) * 1em
+
+=fzRxs
+	font-size: 12px
+=fzRs
+	font-size: 13px
+=fzR
+	font-size: 14px
+=fzRm
+	font-size: 16px
+=fzRl
+	font-size: 18px
+=fzRxl
+	font-size: 20px
+
+$black: 700
+$bold: 700
+$normal: 500
+$light: 400
+=black
+	font-weight: $black
+=bold
+	font-weight: $bold
+=normal
+	font-weight: $normal
+=light
+	font-weight: $light
+
+=fwbb
+	font-weight: $black
+=fwb
+	font-weight: $bold
+=fwn
+	font-weight: $normal
+=fwl
+	font-weight: $light
+
+=brad
+	border-radius: $radio
+=radio
+	border-radius: $radio
+=radioS
+	border-radius: $radioS
+=radioM
+	border-radius: $radioM
+=radioL
+	border-radius: $radioL
+=radioXL
+	border-radius: $radioXL
+
+=bgcov
+	background-size: cover
+	background-repeat: no-repeat
+	background-position: center
+=bgcon
+	background-size: contain
+	background-repeat: no-repeat
+	background-position: center
+=micov
+	mask-size: cover
+	mask-repeat: no-repeat
+	mask-position: center
+=micon
+	mask-size: contain
+	mask-repeat: no-repeat
+	mask-position: center
+
+// Transiciones
+=saliendo
+	transition: all .3s ease
+	&.v-enter-active, &.v-leave-active
+		@content
+=salir
+	transition: all .3s ease
+	&.v-enter, &.v-leave-to
+		@content
+
+=compu
+	@media #{$compu}
+		@content
+=tablet
+	@media #{$tablet}
+		@content
+=movil
+	@media #{$movil}
+		@content
+=minimovil
+	@media #{$movil}
+		@content
+
+=sombra
+	box-shadow: 0 0 3rem transparentize(black, .9)

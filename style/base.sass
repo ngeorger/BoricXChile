@@ -1,0 +1,125 @@
+@use "sass:math"
+@import "vars"
+
+html, body
+	margin: 0
+	padding: 0
+	width: initial !important
+	height: initial !important
+	-webkit-overflow-scrolling: touch
+	scroll-behavior: smooth
+html
+	font-size: $fontsize
+	height: -webkit-fill-available
+	body
+		text-rendering: optimizeLegibility
+		-webkit-font-smoothing: antialiased
+		-moz-osx-font-smoothing: grayscale
+		min-height: 100vh
+		min-height: -webkit-fill-available
+		font-size: 1rem
+		font-family: $fuente
+		background-color: var(--bodyFondo)
+		color: var(--bodyColor)
+		span, a, button, img, p, strong, b, small, h1,h2,h3,h4,h5,h6
+			user-select: none
+		&.body--dark
+			-webkit-text-stroke: 0
+		&, &.body--dark
+			background-color: var(--bodyFondo)
+			color: var(--parrafosColor)
+		a
+			color: $linkColor
+			&:active
+				color: $linkActiveColor
+
+.contenedorGeneral
+	max-width: 100%
+	width: 900px
+	margin: 0 auto
+	padding: 0 1em
+
+.dn
+	display: none
+.db
+	display: block
+.dib
+	display: inline-block
+
+=flexCombinaciones
+	&.ffrn
+		flex-flow: row nowrap
+	&.ffcn
+		flex-flow: column nowrap
+	&.aic
+		align-items: center
+	&.jcc
+		justify-content: center
+	&.jcsb
+		justify-content: space-between
+	&.jcsa
+		justify-content: space-around
+	&.jcfs
+		justify-content: flex-start
+	&.jcfe
+		justify-content: flex-end
+.df,
+.flex
+	display: flex
+	+flexCombinaciones
+.dif,
+.iflex
+	display: inline-flex
+	+flexCombinaciones
+
+.f11
+	flex: auto 1 1
+.f00
+	flex: auto 0 0
+
+.wf
+	width: 100%
+
+.mr1em
+	margin-right: 1em
+.mr1rem
+	margin-right: 1rem
+.ml1em
+	margin-left: 1em
+.ml1rem
+	margin-left: 1rem
+
+.espacioBefore
+	white-space: pre-wrap
+	&::before
+		content: " "
+.espacioAfter
+	white-space: pre-wrap
+	&::after
+		content: " "
+
+.noMovil
+	+movil
+		display: none !important
+.noTablet
+	+tablet
+		display: none !important
+.noCompu
+	+compu
+		display: none !important
+
+.soloMovil
+	+tablet
+		display: none !important
+	+compu
+		display: none !important
+.soloTablet
+	+movil
+		display: none !important
+	+compu
+		display: none !important
+.soloCompu
+	+tablet
+		display: none !important
+	+movil
+		display: none !important
