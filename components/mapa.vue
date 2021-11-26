@@ -88,7 +88,10 @@ export default {
 			_.forEach(elSVG.children, region => {
 				if (region.isEqualNode(nodoRegion)) {
 					if (zoom === 'region') region.classList.add("activa", "exacta")
-					else region.classList.add("activa")
+					else {
+						region.classList.add("activa")
+						region.classList.remove("exacta")
+					}
 					const traslacion =  diffCentroParent(region)
 					region.style.transform = `translate(${traslacion}) scale(2)`
 				} else {
@@ -98,7 +101,10 @@ export default {
 				_.forEach(region.children, provincia => {
 					if (provincia.isEqualNode(nodoProvincia)) {
 						if (zoom === 'provincia') provincia.classList.add("activa", "exacta")
-						else provincia.classList.add("activa")
+						else {
+							provincia.classList.add("activa")
+							provincia.classList.remove("exacta")
+						}
 						const traslacion =  diffCentroParent(provincia)
 						provincia.style.transform = `translate(${traslacion}) scale(2)`
 					} else {
@@ -108,7 +114,10 @@ export default {
 					_.forEach(provincia.children, comuna => {
 						if (comuna.isEqualNode(nodoComuna)) {
 							if (zoom === 'comuna') comuna.classList.add("activa", "exacta")
-							else comuna.classList.add("activa")
+							else {
+								comuna.classList.add("activa")
+								comuna.classList.remove("exacta")
+							}
 							const traslacion =  diffCentroParent(comuna)
 							comuna.style.transform = `translate(${traslacion}) scale(2)`
 						} else {
