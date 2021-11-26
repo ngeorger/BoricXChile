@@ -44,15 +44,26 @@ export default {
 						if (comunaGrupo) comunaGrupo.classList.add("activa")
 					}
 				})
-				if (zoom === 'provincia') {
-					const provinciaGrupo = _.find(region.children, provincia => provincia.id === this.provinciaID)
-					if (provinciaGrupo) provinciaGrupo.classList.add("activa")
-				}
 			})
+
+			let elementoActivo
+
 			if (zoom === 'region') {
-				const regionGrupo = _.find(hijosDelSvg, region => region.id === this.regionID)
-				if (regionGrupo) regionGrupo.classList.add("activa")
+				elementoActivo = _.find(hijosDelSvg, region => region.id === this.regionID)
+			} else if (zoom === 'provincia') {
+				_.forEach(hijosDelSvg, region => {
+					const match = _.find(region.children, provincia => provincia.id === this.provinciaID)
+					if (match) elementoActivo = match
+				})
+			} else if (zoom === 'comuna') {
+				_.forEach(hijosDelSvg, region => {
+					_.forEach(region.children, provincia => {
+						const match = _.find(provincia.children, comuna => comuna.id === this.comunaID)
+						if (match) elementoActivo = match
+					})
+				})
 			}
+			if (elementoActivo) elementoActivo.classList.add("activa")
 		},
 		detectarTerritorio (pathDom) {
 			if (pathDom[0].tagName === 'svg') {
@@ -85,26 +96,28 @@ $colorSeleccionado: #E76B74
 		> g.activa path,
 		> g > g.activa path,
 		path.activa
-			fill: $colorSeleccionado !important
+			fill: $colorSeleccionado
 	&.pais svg
-		// border: 1px solid green
-		> g:nth-child(even)
-			path
-				fill: $colorPar
-				stroke: $colorPar
-		> g:nth-child(odd)
-			path
-				fill: $colorImpar
-				stroke: $colorImpar
 		> g
-			position: relative
-			transform-origin: center
 			transition: all .2s ease
 			&:hover
 				path
-					fill: $colorHover !important
-	//&.region svg
-		> g > g:hover
+					fill: $colorHover
+	&.region svg
+		> g:not(.activa)
+			transition: all .2s ease
+			&:hover
+				path
+					fill: $colorHover
+		> g.activa > g:hover
 			path
 				fill: $colorHover
+	&.provincia svg
+		> g > g:not(.activa)
+			transition: all .2s ease
+			&:hover
+				path
+					fill: $colorHover
+		> g > g.activa > path:hover
+			fill: $colorHover
 </style>
