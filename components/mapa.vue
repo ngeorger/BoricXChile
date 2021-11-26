@@ -138,29 +138,33 @@ $colorImpar: #585B56
 $colorPar: #585B56
 $colorSemitransparente: transparentize($colorBase, .5)
 $colorHover: #937D64
-$colorSeleccionado: #E76B74
+$colorActiva: #E76B74
+$colorActivaExacta: #E76B74
+.mapa
+	max-height: 100vh
+	.unSVG
+		height: 100%
 .unSVG::v-deep 
 	svg
+		height: 100%
 		display: block
 		g,
 		path
 			transition: transform .2s ease
-			// transition: none
 			transform: translate(0,0) scale(1)
 			pointer-events: none
 			fill: transparentize($colorBase, .8)
 
-		> g.activa,
-		> g > g.activa,
-		path.activa
-			// transition: none
-			// transition: transform .2s ease
-			// transform: scale(2)
+		.region.activa path,
+		.provincia.activa path,
+		.comuna.activa
+			fill: $colorSemitransparente
+			pointer-events: none
 
-		> g.activa path,
-		> g > g.activa path,
-		path.activa
-			fill: $colorSeleccionado
+		.region.activa.exacta path,
+		.provincia.activa.exacta path,
+		.comuna.activa.exacta
+			fill: $colorActivaExacta
 			pointer-events: all
 			
 	&.pais svg
