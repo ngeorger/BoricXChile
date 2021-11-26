@@ -61,12 +61,12 @@ export default {
 			})
 		},
 		manejarClick (e) {
-			console.log('manejarClick e.path:', e.path)
+			// console.log('manejarClick e.path:', e.path)
 			let path = e.path
 			const _ = this._
 			const indexSvg = _.findIndex(path, p => p.tagName === 'svg')
 			if (indexSvg >= 0) path = _.slice(path, 0, indexSvg + 1)
-			console.log('manejarClick path:', path)
+			// console.log('manejarClick path:', path)
 			this.$emit('clickSVG', path)
 		}
 	}

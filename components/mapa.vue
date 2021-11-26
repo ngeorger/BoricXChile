@@ -63,7 +63,17 @@ export default {
 					})
 				})
 			}
-			if (elementoActivo) elementoActivo.classList.add("activa")
+			if (elementoActivo) {
+				elementoActivo.classList.add("activa")
+				const boundingBox = elementoActivo.getBBox()
+				console.log('boundingBox', boundingBox)
+				const centroX = boundingBox.x + (boundingBox.width / 2)
+				const centroY = boundingBox.y + (boundingBox.height / 2)
+				// TO DO: Maximizar la zona activa al 80% del área disponible para el svg del mapa
+				elementoActivo.setAttribute('style', `transform-origin: ${centroX}px ${centroY}px;`)
+			}
+
+			// TO DO: Reordenar elementos para que el correspondiente a la zona activa quede primero (z-index en svg se determina por su posición en el código)
 		},
 		detectarTerritorio (pathDom) {
 			if (pathDom[0].tagName === 'svg') {
@@ -71,8 +81,7 @@ export default {
 				return
 			}
 			const [idComuna, idProvincia, idRegion] = this._.map(pathDom, p => p.id)
-			console.log('manejarClickSvg', [idComuna, idProvincia, idRegion])
-			// const [comuna, provincia, region] = [idComuna, idProvincia, idRegion].map(id => this.$p(id))
+			// console.log('manejarClickSvg', [idComuna, idProvincia, idRegion])
 			const [comuna, provincia, region] = [idComuna, idProvincia, idRegion]
 			
 			this.$emit('ClickTerritorio', {comuna, provincia, region})
@@ -91,21 +100,33 @@ $colorSeleccionado: #E76B74
 .unSVG::v-deep 
 	svg
 		display: block
+		g,
 		path
-			fill: $colorSemitransparente
+			transition: transform .2s ease
+			pointer-events: none
+			fill: transparentize($colorBase, .8)
+
+		> g.activa,
+		> g > g.activa,
+		path.activa
+			transform: scale(2)
+
 		> g.activa path,
 		> g > g.activa path,
 		path.activa
 			fill: $colorSeleccionado
+			pointer-events: all
+			
 	&.pais svg
+		path
+			fill: $colorSemitransparente
+			pointer-events: all
 		> g
-			transition: all .2s ease
 			&:hover
 				path
 					fill: $colorHover
 	&.region svg
 		> g:not(.activa)
-			transition: all .2s ease
 			&:hover
 				path
 					fill: $colorHover
@@ -114,7 +135,6 @@ $colorSeleccionado: #E76B74
 				fill: $colorHover
 	&.provincia svg
 		> g > g:not(.activa)
-			transition: all .2s ease
 			&:hover
 				path
 					fill: $colorHover
