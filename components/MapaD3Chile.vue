@@ -27,11 +27,21 @@ export default {
 			path:null,
 		}
 	},
-	mounted() {
-		this.createMap()
+	watch: {
+		selectedCodigoRegion(codigoRegion){
+			this.selectRegion(codigoRegion)
+		},
+		selectedCodigoComuna(codigoComuna){
+			this.selectComuna(codigoComuna)
+		}
+	},
+	async mounted() {
+		await this.createMap()
+		this.selectRegion(this.selectedCodigoRegion)
+		this.selectComuna(this.selectedCodigoComuna)
 	},
 	methods: {
-		createMap(){
+		async createMap(){
 			const svg = d3.select(this.$el)
 			this.width = +svg.attr('width')
 			this.height = +svg.attr('height')
@@ -40,7 +50,7 @@ export default {
 				.scale(800)
 				.rotate([0,0])
 			this.path = d3.geoPath().projection(projection)
-			d3.json("/chile-comunas.json").then(chileComunas =>  {
+			await d3.json("/chile-comunas.json").then(chileComunas =>  {
 				const self = this
 				this.g = svg.append('g')
 				this.g
@@ -70,6 +80,29 @@ export default {
 					}
 				});
 			})
+		},
+		selectRegion(codigoRegion){
+			if(codigoRegion){
+				const self = this
+				this.g.selectAll("path")
+					.each(function(d) {
+						if (d.properties.codregion === codigoRegion) {
+							self.zoom(d)
+						}
+					})
+			}
+		},
+		selectComuna(codigoComuna){
+			if(codigoComuna){
+				const self = this
+				this.g.selectAll("path")
+					.each(function(d) {
+						if (d.properties.cod_comuna === codigoComuna) {
+							self.zoom(d)
+							this.style.fill = "green"
+						}
+					})
+			}
 		},
 		mouseOver(el, dIn){
 			if(this.selectedCodigoRegion){
