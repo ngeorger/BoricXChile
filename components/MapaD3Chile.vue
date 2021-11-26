@@ -40,8 +40,8 @@ export default {
 	},
 	async mounted() {
 		await this.createMap()
-		this.selectRegion(this.selectedCodigoRegion)
-		this.selectComuna(this.selectedCodigoComuna)
+		this.selectRegion(this.selectedCodigoRegion, true)
+		this.selectComuna(this.selectedCodigoComuna, true)
 	},
 	methods: {
 		async createMap(){
@@ -83,25 +83,29 @@ export default {
 				});
 			})
 		},
-		selectRegion(codigoRegion){
+		selectRegion(codigoRegion, zoom = false){
 			if(codigoRegion){
 				const self = this
 				this.g.selectAll("path")
 					.each(function(d) {
 						if (d.properties.codregion === codigoRegion) {
 							this.style.fill = selectedRegionColor
-							self.zoom(d)
+							if(zoom){
+								self.zoom(d)
+							}
 						}
 					})
 			}
 		},
-		selectComuna(codigoComuna){
+		selectComuna(codigoComuna, zoom = false){
 			if(codigoComuna){
 				const self = this
 				this.g.selectAll("path")
 					.each(function(d) {
 						if (d.properties.cod_comuna === codigoComuna) {
-							self.zoom(d)
+							if(zoom){
+								self.zoom(d)
+							}
 							this.style.fill = selectedComunaColor
 						}
 					})
@@ -153,24 +157,47 @@ export default {
 				this.selectComuna(dIn.properties.cod_comuna)
 			}
 			if(this.selectedCodigoComuna !== dIn.properties.cod_comuna){
-				this.zoom(dIn)
+				this.zoom(dIn, true)
 			}
 		},
-		zoom(d){
-			const centroid = this.path.centroid(d)
-			const x = centroid[0]
-			const y = centroid[1]
-			const k = 4
+		zoom(dIn){
+			let maxY = null
+			let minY = null
+			let maxX = null
+			let minX = null
+			const self = this
+			const chileSizeX = 41.470082545805326
+			const chileSizeY = 36.014626435053174
+			this.g.selectAll("path")
+				.each(function(d) {
+					if(this.style){
+						this.style.strokeWidth = 0.05
+					}
+					if(d.properties.codregion === dIn.properties.codregion){
+						const bounds = self.path.bounds(d)
+						if(!minX || minX > bounds[0][0]){
+							minX = bounds[0][0]
+						}
+						if(!minY || minY > bounds[0][1]){
+							minY = bounds[0][1]
+						}
+						if(!maxX || maxX < bounds[1][0]){
+							maxX = bounds[1][0]
+						}
+						if(!maxY || maxY < bounds[1][1]){
+							maxY = bounds[1][1]
+						}
+					}
+				})
+			const x = (minX + maxX)/2
+			const y = (maxY+minY)/2
+			const sizeX = maxX - minX
+			const sizeY = maxY - minY
+			const k = 10/(sizeX > sizeY? sizeX/chileSizeX: (sizeY/(chileSizeY*1.5)))
 			this.g.transition()
 				.duration(750)
 				.attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
 				.style("stroke-width", 0.5 / k + "px")
-			this.g.selectAll("path")
-				.each(function() {
-					if(this.style){
-						this.style.strokeWidth = 0.05
-					}
-				})
 		},
 		unselect(){
 			this.g.selectAll("path")
