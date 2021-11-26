@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils'
-import mapa from '@/components/mapa.vue'
+import proto from '@/components/-proto.vue'
 
-describe('mapa', () => {
+describe('proto', () => {
 	test('is a Vue instance', () => {
-		const wrapper = mount(mapa)
+		const wrapper = mount(proto)
 		expect(wrapper.vm).toBeTruthy()
 	})
 })
