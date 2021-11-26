@@ -36,7 +36,7 @@ export default {
 			this.width = +svg.attr('width')
 			this.height = +svg.attr('height')
 			const projection = geoMercator()
-				.center([-80, -30])
+				.center([-50, -31])
 				.scale(800)
 				.rotate([0,0])
 			this.path = d3.geoPath().projection(projection)
@@ -44,11 +44,11 @@ export default {
 				const self = this
 				this.g = svg.append('g')
 				this.g
-					.selectAll('.state')
+					.selectAll('.comuna')
 					.data(topojson.feature(chileComunas, chileComunas.objects.Final).features)
 					.enter()
 					.append("path")
-					.attr("class", "state")
+					.attr("class", "comuna")
 					.attr("d", this.path)
 					.each(function (d)
 					{
@@ -63,7 +63,12 @@ export default {
 								self.clicked(this, d)
 							})
 					})
-				this.g.attr('transform', 'scale(0.57)')
+				this.$el.addEventListener('click', e => {
+					console.log(e.target.classList)
+					if(!e.target.classList.contains('comuna')){
+						this.unselect()
+					}
+				});
 			})
 		},
 		mouseOver(el, dIn){
@@ -138,13 +143,28 @@ export default {
 				.duration(750)
 				.attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
 				.style("stroke-width", 1.5 / k + "px")
+		},
+		unselect(){
+			this.g.selectAll("path")
+				.each(function(d) {
+					this.style.fill = "#ccc"
+				})
+			this.$emit('update:selected-codigo-comuna', null)
+			this.$emit('update:selected-codigo-region', null)
+			this.zoomOut();
+		},
+		zoomOut(){
+			this.g.transition()
+				.duration(750)
+				.attr("transform", "")
+				.style("stroke-width", 1 + "px")
 		}
 	}
 }
 </script>
 
 <style>
-.state {
+.comuna {
 	fill: #ccc;
 	stroke: #fff;
 }
