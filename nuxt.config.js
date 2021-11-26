@@ -3,6 +3,11 @@ import path from 'path'
 const nuxtConfig = {
 	// Target: https://go.nuxtjs.dev/config-target
 	target: 'static',
+	server: {
+		port: 3053,
+		host: '0.0.0.0',
+		timing: false
+	},
 	env: {
 		inicio: new Date(),
 		version: 'v1.3.1',
@@ -23,7 +28,7 @@ const nuxtConfig = {
 			{ name: 'format-detection', content: 'telephone=no' }
 		],
 		link: [
-			{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+			{ rel: 'icon', type: 'image/x-icon', href: '/favicon.svg' }
 		]
 	},
 
