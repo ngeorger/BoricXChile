@@ -3,6 +3,24 @@
 	UnSVG(ref="unSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
 </template>
 <script>
+function centroPropio (nodo) {
+	console.log('centroPropio', nodo.id)
+	const nodoBBox = nodo.getBBox()
+	const nodoCentro = {x:nodoBBox.x + (nodoBBox.width / 2), y:  nodoBBox.y + (nodoBBox.height / 2)}
+	console.log('centroPropio', nodo.id, Object.values(nodoCentro))
+	return Object.values(nodoCentro).map(v => `${v}px`).join(' ')
+}
+
+function diffCentroParent (nodo) {
+	console.log('diffCentroParent', nodo.id)
+	const parentBBox = nodo.parentNode.getBBox()
+	const parentCentro = {x: parentBBox.x + (parentBBox.width / 2), y: parentBBox.y + (parentBBox.height / 2)}
+
+	const nodoBBox = nodo.getBBox()
+	const nodoCentro = {x:nodoBBox.x + (nodoBBox.width / 2), y:  nodoBBox.y + (nodoBBox.height / 2)}
+	const diffCentros = {x: parentCentro.x - nodoCentro.x, y: parentCentro.y - nodoCentro.y}
+	return Object.values(diffCentros).map(v => `${v}px`).join(', ')
+}
 export default {
 	props: {
 		zoom: {
@@ -41,65 +59,65 @@ export default {
 			this.destacarSeleccionada()
 		},
 		async destacarSeleccionada () {
+			console.log('destacarSeleccionada')
 			await new Promise(resolve => { requestAnimationFrame(resolve) })
 
 			const _ = this._
 			const zoom = this.zoom
-			const hijosDelSvg = this._.get(this.$refs, ['unSVG','$el', 'children', 0, 'children'])
+			const elSVG = this._.get(this.$refs, ['unSVG','$el', 'children', 0])
 			
-			let elementoActivo
-
-			_.forEach(hijosDelSvg, region => {
-				let contiene
-
+			let cadena
+			_.forEach(elSVG.children, region => {
+				region.classList.add("region")
 				_.forEach(region.children, provincia => {
+					provincia.classList.add("provincia")
 					_.forEach(provincia.children, comuna => {
-						if (zoom === 'comuna' && comuna.id === this.comunaID) {
-							elementoActivo = comuna
-							contiene = true
+						comuna.classList.add("comuna")
+						if (zoom === 'comuna' && comuna.id === this.comunaID) cadena = [region, provincia, comuna]
+						comuna.style.transformOrigin = centroPropio(comuna)
+					})
+					if (zoom === 'provincia' && provincia.id === this.provinciaID) cadena = [region, provincia]
+					provincia.style.transformOrigin = centroPropio(provincia)
+				})
+				if (zoom === 'region' && region.id === this.regionID) cadena = [region]
+				region.style.transformOrigin = centroPropio(region)
+			})
+			console.log('cadena', cadena)
+			const [nodoRegion, nodoProvincia, nodoComuna] = cadena || []
+
+			_.forEach(elSVG.children, region => {
+				if (region.isEqualNode(nodoRegion)) {
+					if (zoom === 'region') region.classList.add("activa", "exacta")
+					else region.classList.add("activa")
+					const traslacion =  diffCentroParent(region)
+					region.style.transform = `translate(${traslacion}) scale(2)`
+				} else {
+					region.classList.remove("activa", "exacta")
+					region.style.transform = 'none'
+				}
+				_.forEach(region.children, provincia => {
+					if (provincia.isEqualNode(nodoProvincia)) {
+						if (zoom === 'provincia') provincia.classList.add("activa", "exacta")
+						else provincia.classList.add("activa")
+						const traslacion =  diffCentroParent(provincia)
+						provincia.style.transform = `translate(${traslacion}) scale(2)`
+					} else {
+						provincia.classList.remove("activa", "exacta")
+						provincia.style.transform = 'none'
+					}
+					_.forEach(provincia.children, comuna => {
+						if (comuna.isEqualNode(nodoComuna)) {
+							if (zoom === 'comuna') comuna.classList.add("activa", "exacta")
+							else comuna.classList.add("activa")
+							const traslacion =  diffCentroParent(comuna)
+							comuna.style.transform = `translate(${traslacion}) scale(2)`
 						} else {
-							comuna.classList.remove("activa")
-							comuna.setAttribute('style', null)
+							comuna.classList.remove("activa", "exacta")
+							comuna.style.transform = 'none'
 						}
 					})
-					if (zoom === 'provincia' && provincia.id === this.provinciaID) {
-						elementoActivo = provincia
-						contiene = true
-					} else provincia.classList.remove("activa")
-					if (!contiene) provincia.setAttribute('style', null)
 				})
-				if (zoom === 'region' && region.id === this.regionID) {
-					elementoActivo = region
-					contiene = true
-				} else region.classList.remove("activa")
-				if (!contiene) region.setAttribute('style', null)
 			})
-
-			if (elementoActivo) {
-				elementoActivo.classList.add("activa")
-				// TO DO: Maximizar la zona activa al 80% del área disponible para el svg del mapa
-				
-				const parentElement = elementoActivo.parentNode
-				const parentBoundingBox = parentElement.getBBox()
-				const parentCentroX = parentBoundingBox.x + (parentBoundingBox.width / 2)
-				const parentCentroY = parentBoundingBox.y + (parentBoundingBox.height / 2)
-				this.parentCentro = [parentCentroX, parentCentroY]
-				console.log('parentCentroX, parentCentroY', [parentCentroX, parentCentroY])
-
-				const boundingBox = elementoActivo.getBBox()
-				console.log('boundingBox', zoom, boundingBox)
-				const centroX = boundingBox.x + (boundingBox.width / 2)
-				const centroY = boundingBox.y + (boundingBox.height / 2)
-				const corregirCentroElemento = `transform-origin: ${centroX}px ${centroY}px;`
-				const diferenciaX = parentCentroX - centroX
-				const diferenciaY = parentCentroY - centroY
-
-				const escalado = zoom === 'region' ? 4 : zoom === 'provincia' ? 3 : zoom === 'comuna' ? 2 : 1 
-				const moverAlCentroDelSVGYAgrandar = `transform: translate(${diferenciaX}px, ${diferenciaY}px) scale(${escalado});`
-				elementoActivo.setAttribute('style', `${corregirCentroElemento} ${moverAlCentroDelSVGYAgrandar} `)
-			}
-
-			// TO DO: Reordenar elementos para que el correspondiente a la zona activa quede primero (z-index en svg se determina por su posición en el código)
 		},
 		detectarTerritorio (pathDom) {
 			if (pathDom[0].tagName === 'svg') {
@@ -107,9 +125,7 @@ export default {
 				return
 			}
 			const [idComuna, idProvincia, idRegion] = this._.map(pathDom, p => p.id)
-			// console.log('manejarClickSvg', [idComuna, idProvincia, idRegion])
 			const [comuna, provincia, region] = [idComuna, idProvincia, idRegion]
-			
 			this.$emit('ClickTerritorio', {comuna, provincia, region})
 		}
 	}
@@ -170,4 +186,8 @@ $colorSeleccionado: #E76B74
 					fill: $colorHover
 		> g > g.activa > path:hover
 			fill: $colorHover
+
+
+// .region.activa
+
 </style>

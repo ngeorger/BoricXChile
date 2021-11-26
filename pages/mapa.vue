@@ -6,17 +6,17 @@
 	.contenido
 		.migajas
 			.regionID(v-if="regionID")
-				pre regionID
+				//- pre regionID
 				pre {{regionID}}
 			.provinciaID(v-if="provinciaID")
-				pre provinciaID
+				//- pre provinciaID
 				pre {{provinciaID}}
 			.comunaID(v-if="comunaID")
-				pre comunaID
+				//- pre comunaID
 				pre {{comunaID}}
-		.info
+		//.info
 			pre #[b zoom]: {{zoom}}
-		.info
+		//.info
 			b Log
 			pre {{log}}
 		n-child
