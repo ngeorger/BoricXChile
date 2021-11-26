@@ -23,7 +23,6 @@ export default {
 			g: null,
 			width: null,
 			height: null,
-			centered: null,
 			path:null,
 		}
 	},
@@ -74,7 +73,6 @@ export default {
 							})
 					})
 				this.$el.addEventListener('click', e => {
-					console.log(e.target.classList)
 					if(!e.target.classList.contains('comuna')){
 						this.unselect()
 					}
@@ -156,22 +154,10 @@ export default {
 			}
 		},
 		zoom(d){
-			let x, y, k
-			if (d && this.centered !== d) {
-				const centroid = this.path.centroid(d)
-				x = centroid[0]
-				y = centroid[1]
-				k = 4
-				this.centered = d
-			} else {
-				x = this.width / 2
-				y = this.height / 2
-				k = 1
-				this.centered = null
-			}
-			this.g.selectAll("path")
-				.classed("active", this.centered && function(d) { return d === this.centered })
-
+			const centroid = this.path.centroid(d)
+			const x = centroid[0]
+			const y = centroid[1]
+			const k = 4
 			this.g.transition()
 				.duration(750)
 				.attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
@@ -179,7 +165,7 @@ export default {
 		},
 		unselect(){
 			this.g.selectAll("path")
-				.each(function(d) {
+				.each(() => {
 					this.style.fill = "#ccc"
 				})
 			this.$emit('update:selected-codigo-comuna', null)
@@ -200,5 +186,6 @@ export default {
 .comuna {
 	fill: #ccc;
 	stroke: #fff;
+	stroke-width: 0.2;
 }
 </style>
