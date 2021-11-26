@@ -1,11 +1,11 @@
 <template lang="pug">
-.paginaIndex
-	h1 
-		n-link(to="/mapa") Mapa
+
 </template>
 <script>
 export default {
-
+	mounted () {
+		this.$router.push('/mapa')
+	}
 }
 </script>
 <style lang="sass" scoped>
