@@ -1,5 +1,5 @@
 <template lang="pug">
-.unSVG(ref="elSVG" :class="[{lineal, relleno}, tipo]" @click="manejarClick" v-html="svg")
+.unSVG(ref="elSVG" :class="[tipo]" @click="manejarClick")
 
 </template>
 <script>
@@ -12,16 +12,6 @@ export default {
 		tipo: {
 			type: String,
 			required: true
-		},
-		lineal: {
-			type: Boolean,
-			required: false,
-			default: false
-		},
-		relleno: {
-			type: Boolean,
-			required: false,
-			default: false
 		}
 	},
 	data () {
@@ -41,10 +31,11 @@ export default {
 				console.log('iconoCacheado', iconoCacheado)
 				if (iconoCacheado && iconoCacheado.svg) {
 					this.svg = iconoCacheado.svg
-					// this.$refs.elSVG.innerHTML = iconoCacheado.svg
-					if (process.env.inicio === iconoCacheado.versionTemporal) return
+					this.$refs.elSVG.innerHTML = iconoCacheado.svg
+					if (!process.env.dev && process.env.inicio === iconoCacheado.versionTemporal) return
 				}
-				this.cargarSVG()
+				await this.cargarSVG()
+				this.$emit('listo')
 			}
 		},
 		async cargarSVG (tipo = this.tipo) {
@@ -85,21 +76,13 @@ export default {
 @import "style/vars"
 .unSVG
 	flex: auto 0 0
-	// width: 1em
-	// height: 1em
 	color: inherit
 	display: flex
 	align-items: center
 	justify-content: center
 	color: inherit
-	::v-deep
+	// ::v-deep
 		svg
-			// color: inherit
 			border: 1px solid red
-			// path,
-			// rect,
-			// circle
-				stroke-width: 0 !important
-				fill: transparent !important
 			
 </style>
