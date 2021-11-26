@@ -1,5 +1,5 @@
 <template lang="pug">
-.unSVG(ref="elSVG" :class="[{lineal, relleno}, tipo]")
+.unSVG(ref="elSVG" :class="[{lineal, relleno}, tipo]" @click="manejarClick" v-html="svg")
 
 </template>
 <script>
@@ -7,6 +7,7 @@ import axios from 'axios'
 import localforage from 'localforage'
 const iconoStore = localforage.createInstance({ name: 'iconoStore' })
 export default {
+	name: 'UnSVG',
 	props: {
 		tipo: {
 			type: String,
@@ -40,7 +41,7 @@ export default {
 				console.log('iconoCacheado', iconoCacheado)
 				if (iconoCacheado && iconoCacheado.svg) {
 					this.svg = iconoCacheado.svg
-					this.$refs.elSVG.innerHTML = iconoCacheado.svg
+					// this.$refs.elSVG.innerHTML = iconoCacheado.svg
 					if (process.env.inicio === iconoCacheado.versionTemporal) return
 				}
 				this.cargarSVG()
@@ -67,13 +68,22 @@ export default {
 				svg: svgData,
 				versionTemporal: process.env.inicio
 			})
+		},
+		manejarClick (e) {
+			console.log('manejarClick e.path:', e.path)
+			let path = e.path
+			const _ = this._
+			const indexSvg = _.findIndex(path, p => p.tagName === 'svg')
+			if (indexSvg >= 0) path = _.slice(path, 0, indexSvg + 1)
+			console.log('manejarClick path:', path)
+			this.$emit('clickSVG', path)
 		}
 	}
 }
 </script>
 <style lang="sass" scoped>
 @import "style/vars"
-.elSVG
+.unSVG
 	flex: auto 0 0
 	// width: 1em
 	// height: 1em
@@ -84,29 +94,12 @@ export default {
 	color: inherit
 	::v-deep
 		svg
-			color: inherit
-			path,
-			rect,
-			circle
+			// color: inherit
+			border: 1px solid red
+			// path,
+			// rect,
+			// circle
 				stroke-width: 0 !important
 				fill: transparent !important
-	&.lineal
-		::v-deep svg 
-			path,
-			rect,
-			circle
-				stroke: currentColor !important
-				stroke-width: var(--bordeAnchura, inherit) !important
-	&.relleno
-		::v-deep svg 
-			path,
-			rect,
-			circle
-				stroke-width: var(--fondoColor, currentColor) !important
-
-	//&.email:hover
-		::v-deep 
-			#arroba
-				opacity: .5
 			
 </style>

@@ -1,7 +1,5 @@
 <template lang="pug">
-.paginaIndex
-	h1 
-		n-link(to="/mapa") Mapa
+
 </template>
 <script>
 export default {
