@@ -7,6 +7,10 @@ import * as d3 from 'd3'
 import {geoMercator} from 'd3-geo'
 import * as topojson from 'topojson'
 
+const selectedRegionColor = '#177496'
+const selectedComunaColor = '#094c68'
+const unselectedColor = '#0e8974'
+
 export default {
 	props: {
 		selectedCodigoRegion:{
@@ -23,7 +27,7 @@ export default {
 			g: null,
 			width: null,
 			height: null,
-			path:null,
+			path:null
 		}
 	},
 	watch: {
@@ -85,6 +89,7 @@ export default {
 				this.g.selectAll("path")
 					.each(function(d) {
 						if (d.properties.codregion === codigoRegion) {
+							this.style.fill = selectedRegionColor
 							self.zoom(d)
 						}
 					})
@@ -97,19 +102,19 @@ export default {
 					.each(function(d) {
 						if (d.properties.cod_comuna === codigoComuna) {
 							self.zoom(d)
-							this.style.fill = "green"
+							this.style.fill = selectedComunaColor
 						}
 					})
 			}
 		},
 		mouseOver(el, dIn){
 			if(this.selectedCodigoRegion){
-				el.style.fill = "green"
+				el.style.fill = selectedComunaColor
 			} else {
 				this.g.selectAll("path")
 					.each(function(d) {
 						if(d.properties.codregion === dIn.properties.codregion){
-							this.style.fill = "green"
+							this.style.fill = selectedComunaColor
 						}
 					})
 			}
@@ -117,37 +122,35 @@ export default {
 		mouseLeave(el, dIn){
 			if(this.selectedCodigoRegion){
 				if(dIn.properties.cod_comuna !== this.selectedCodigoComuna){
-					el.style.fill = "#ccc"
+					if(dIn.properties.codregion === this.selectedCodigoRegion){
+						el.style.fill = selectedRegionColor
+					} else {
+						el.style.fill = unselectedColor
+					}
 				}
 			} else {
 				this.g.selectAll("path")
 					.each(function(d) {
 						if (d.properties.codregion === dIn.properties.codregion) {
-							this.style.fill = "#ccc"
+							this.style.fill = unselectedColor
 						}
 					})
 			}
 		},
 		clicked(el, dIn) {
+			this.g.selectAll("path")
+				.each(function() {
+					if(this.style){
+						this.style.fill = unselectedColor
+					}
+				})
 			if(this.selectedCodigoRegion !== dIn.properties.codregion){
 				this.$emit('update:selected-codigo-region', dIn.properties.codregion)
-				this.g.selectAll("path")
-					.each(function(d) {
-						if (d.properties.codregion === dIn.properties.codregion) {
-							this.style.fill = "#ccc"
-						}
-					})
+				this.selectRegion(dIn.properties.codregion)
 			}
 			if(this.selectedCodigoRegion){
 				this.$emit('update:selected-codigo-comuna', dIn.properties.cod_comuna)
-				this.g.selectAll("path")
-					.each(function(d) {
-						if (d.properties.cod_comuna === dIn.properties.cod_comuna) {
-							this.style.fill = "green"
-						} else {
-							this.style.fill = "#ccc"
-						}
-					})
+				this.selectComuna(dIn.properties.cod_comuna)
 			}
 			if(this.selectedCodigoComuna !== dIn.properties.cod_comuna){
 				this.zoom(dIn)
@@ -165,8 +168,10 @@ export default {
 		},
 		unselect(){
 			this.g.selectAll("path")
-				.each(() => {
-					this.style.fill = "#ccc"
+				.each(function() {
+					if(this.style){
+						this.style.fill = unselectedColor
+					}
 				})
 			this.$emit('update:selected-codigo-comuna', null)
 			this.$emit('update:selected-codigo-region', null)
@@ -184,7 +189,7 @@ export default {
 
 <style>
 .comuna {
-	fill: #ccc;
+	fill: #0e8974;
 	stroke: #fff;
 	stroke-width: 0.2;
 }
