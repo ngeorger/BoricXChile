@@ -50,6 +50,7 @@ const nuxtConfig = {
 
 	// Build Configuration: https://go.nuxtjs.dev/config-build
 	build: {
+		standalone: true,
 		extend (config, ctx) {
 			config.resolve.alias.style = path.join(__dirname, 'style')
 			config.resolve.alias['@style'] = path.join(__dirname, 'style')
