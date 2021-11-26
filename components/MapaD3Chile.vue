@@ -164,7 +164,13 @@ export default {
 			this.g.transition()
 				.duration(750)
 				.attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")scale(" + k + ")translate(" + -x + "," + -y + ")")
-				.style("stroke-width", 1.5 / k + "px")
+				.style("stroke-width", 0.5 / k + "px")
+			this.g.selectAll("path")
+				.each(function() {
+					if(this.style){
+						this.style.strokeWidth = 0.05
+					}
+				})
 		},
 		unselect(){
 			this.g.selectAll("path")
