@@ -94,7 +94,7 @@ export default {
 				const diferenciaX = parentCentroX - centroX
 				const diferenciaY = parentCentroY - centroY
 
-				const escalado = zoom === 'region' ? 8 : zoom === 'provincia' ? 3 : zoom === 'comuna' ? 2 : 1 
+				const escalado = zoom === 'region' ? 4 : zoom === 'provincia' ? 3 : zoom === 'comuna' ? 2 : 1 
 				const moverAlCentroDelSVGYAgrandar = `transform: translate(${diferenciaX}px, ${diferenciaY}px) scale(${escalado});`
 				elementoActivo.setAttribute('style', `${corregirCentroElemento} ${moverAlCentroDelSVGYAgrandar} `)
 			}
