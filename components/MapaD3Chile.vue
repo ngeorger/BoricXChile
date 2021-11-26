@@ -146,8 +146,8 @@ export default {
 				})
 			if(this.selectedCodigoRegion !== dIn.properties.codregion){
 				this.$emit('update:selected-codigo-region', dIn.properties.codregion)
-				this.selectRegion(dIn.properties.codregion)
 			}
+			this.selectRegion(dIn.properties.codregion)
 			if(this.selectedCodigoRegion){
 				this.$emit('update:selected-codigo-comuna', dIn.properties.cod_comuna)
 				this.selectComuna(dIn.properties.cod_comuna)
