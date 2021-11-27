@@ -43,12 +43,12 @@ export default {
 			const url = `/svg/${tipo}.svg`
 			// if (this.tipo === 'llave')
 			const svgData = await axios.get(url).then(r => {
-				console.log('axios svg', r.data)
+				// console.log('axios svg', r.data)
 				return r.data
 			}).catch(e => {
 				console.error('Error axios svg', e)
 			})
-			console.log('svgData', svgData)
+			// console.log('svgData', svgData)
 			if (!svgData) {
 				this.svg = 'SVG no encontrado'
 				return

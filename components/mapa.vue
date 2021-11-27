@@ -1,37 +1,34 @@
 <template lang="pug">
 .mapa(:class="zoom")
-	UnSVG.tierra(ref="trasSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
 	UnSVG.territorio(ref="unSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
 </template>
 <script>
-function centroPropio (nodo) {
-	console.log('centroPropio', nodo.id)
+function encontrarCentro (nodo) {
+	console.log('encontrarCentro', nodo.id)
 	const nodoBBox = nodo.getBBox()
 	const nodoCentro = {x:nodoBBox.x + (nodoBBox.width / 2), y:  nodoBBox.y + (nodoBBox.height / 2)}
-	console.log('centroPropio', nodo.id, Object.values(nodoCentro))
-	return Object.values(nodoCentro).map(v => `${v}px`).join(' ')
+	console.log('nodoCentro', nodoCentro)
+	return nodoCentro
 }
 
-function diffCentroParent (nodo) {
-	console.log('diffCentroParent', nodo.id)
-	const parentBBox = nodo.parentNode.getBBox()
-	const parentCentro = {x: parentBBox.x + (parentBBox.width / 2), y: parentBBox.y + (parentBBox.height / 2)}
-
-	const nodoBBox = nodo.getBBox()
-	const nodoCentro = {x:nodoBBox.x + (nodoBBox.width / 2), y:  nodoBBox.y + (nodoBBox.height / 2)}
-	const diffCentros = {x: (parentCentro.x - nodoCentro.x), y: parentCentro.y - nodoCentro.y}
-	return Object.values(diffCentros).map(v => `${v}px`).join(', ')
+function translateAlArea (nodo) {
+	console.log('translateAlArea', nodo.id)
+	const centroOrigen = encontrarCentro(nodo)
+	const centroDestino = encontrarCentro(nodo.parentNode)
+	const diffCentros = {x: (centroDestino.x - centroOrigen.x), y: centroDestino.y - centroOrigen.y}
+	const valores = Object.values(diffCentros).map(v => `${v}px`).join(', ')
+	console.log('translateAlArea valores', valores)
+	return valores
 }
 
-// eslint-disable-next-line
-function escalarSegunParent (nodo, elSVG) {
-	console.log('escalarSegunParent', nodo.id)
-	const viewportBBox = { x: 0, y: 0, width: 4009, height: 8717}
-	const nodoBBox = nodo.getBBox()
-	const parentBBox = nodo.parentNode.getBBox()
+function escalaAlArea (paisGroup, nodoArea) {
+	console.log('escalaAlArea', nodoArea.id)
+	const viewportBBox = paisGroup.getBBox() // { x: 0, y: 0, width: 4009, height: 8717}
+	const nodoAreaBBox = nodoArea.getBBox()
 
-	const escalaContain = Math.min(parentBBox.width / Math.min(nodoBBox.width, viewportBBox.width), parentBBox.height / Math.min(nodoBBox.height, viewportBBox.height))
+	const escalaContain = Math.min(viewportBBox.width / nodoAreaBBox.width, viewportBBox.height / nodoAreaBBox.height)
 
+	console.log('escalaAlArea =>', escalaContain)
 	return escalaContain
 }
 
@@ -54,22 +51,12 @@ export default {
 			default: null
 		}
 	},
-	data () {
-		return {
-			svgCentro: null
-		}
-	},
 	watch: {
 		zoom () { this.destacarSeleccionada() }
 	},
-	mounted () { this.destacarSeleccionada() },
+	// mounted () { this.destacarSeleccionada() },
 	methods: {
 		iniciar () {
-			const svgElement = this._.get(this.$refs, ['unSVG','$el', 'children', 0])
-			const svgBoundingBox = svgElement.getBBox()
-			const svgCentroX = svgBoundingBox.x + (svgBoundingBox.width / 2)
-			const svgCentroY = svgBoundingBox.y + (svgBoundingBox.height / 2)
-			this.svgCentro = [svgCentroX, svgCentroY]
 			this.destacarSeleccionada()
 		},
 		async destacarSeleccionada () {
@@ -79,36 +66,46 @@ export default {
 			const _ = this._
 			const zoom = this.zoom
 			const elSVG = this._.get(this.$refs, ['unSVG','$el', 'children', 0])
+			console.log('elSVG', elSVG)
+			const paisGroup = this._.get(elSVG, ['children', 'pais'])
+			console.log('paisGroup', paisGroup)
 			
 			let cadena
-			_.forEach(elSVG.children, region => {
+			_.forEach(paisGroup.children, region => {
 				region.classList.add("region")
 				_.forEach(region.children, provincia => {
 					provincia.classList.add("provincia")
 					_.forEach(provincia.children, comuna => {
 						comuna.classList.add("comuna")
 						if (zoom === 'comuna' && comuna.id === this.comunaID) cadena = [region, provincia, comuna]
-						comuna.style.transformOrigin = centroPropio(comuna)
 					})
 					if (zoom === 'provincia' && provincia.id === this.provinciaID) cadena = [region, provincia]
-					provincia.style.transformOrigin = centroPropio(provincia)
 				})
 				if (zoom === 'region' && region.id === this.regionID) cadena = [region]
-				region.style.transformOrigin = centroPropio(region)
 			})
+
+			if (cadena) {
+				const centroDestino = encontrarCentro(_.last(cadena))
+				paisGroup.style.transformOrigin = `${centroDestino.x}px ${centroDestino.y}px`
+				paisGroup.style.transform = `translate(${translateAlArea(_.last(cadena))}) scale(${escalaAlArea(paisGroup, _.last(cadena))})`
+			} else {
+				paisGroup.style.transformOrigin = '50% 50%'
+				paisGroup.style.transform = 'scale(1)'
+			}
+			// console.log('paisGroup', paisGroup)
+			// console.log('paisGroup.style', paisGroup.style)
+			// console.log('paisGroup.style.transformOrigin', paisGroup.style.transformOrigin)
+			// console.log('paisGroup.style.transform', paisGroup.style.transform)
 			console.log('cadena', cadena)
 			const [nodoRegion, nodoProvincia, nodoComuna] = cadena || []
 
-			_.forEach(elSVG.children, region => {
+			_.forEach(paisGroup.children, region => {
 				if (region.isEqualNode(nodoRegion)) {
 					if (zoom === 'region') region.classList.add("activa", "exacta")
 					else {
 						region.classList.add("activa")
 						region.classList.remove("exacta")
 					}
-					const traslacion =  diffCentroParent(region)
-					region.style.transform = `translate(${traslacion}) scale(${escalarSegunParent(region, elSVG)})`
-					// region.style.transform = `translate(${traslacion}) scale(${escalarSegunSVG(region, elSVG)})`
 				} else {
 					region.classList.remove("activa", "exacta")
 					region.style.transform = null
@@ -120,9 +117,6 @@ export default {
 							provincia.classList.add("activa")
 							provincia.classList.remove("exacta")
 						}
-						const traslacion = diffCentroParent(provincia)
-						provincia.style.transform = `translate(${traslacion}) scale(${escalarSegunParent(provincia, elSVG)})`
-						// provincia.style.transform = `translate(${traslacion}) scale(${escalarSegunSVG(provincia, elSVG)})`
 					} else {
 						provincia.classList.remove("activa", "exacta")
 						provincia.style.transform = null
@@ -134,9 +128,6 @@ export default {
 								comuna.classList.add("activa")
 								comuna.classList.remove("exacta")
 							}
-							const traslacion =  diffCentroParent(comuna)
-							comuna.style.transform = `translate(${traslacion}) scale(${escalarSegunParent(comuna, elSVG)})`
-							// comuna.style.transform = `translate(${traslacion}) scale(${escalarSegunSVG(comuna, elSVG)})`
 						} else {
 							comuna.classList.remove("activa", "exacta")
 							comuna.style.transform = null
@@ -186,8 +177,6 @@ $colorActivaExacta: #E76B74
 		transition: transform .2s ease 
 		g,
 		path
-			transition: transform .2s ease, transformOrigin .2s linear, transform-origin .2s linear
-			transform: translate(0,0) scale(1)
 			pointer-events: none
 			fill: $colorSemitransparente
 
@@ -209,10 +198,9 @@ $colorActivaExacta: #E76B74
 		path
 			fill: $colorSemitransparente
 			pointer-events: all
-		> g
-			&:hover
-				path
-					fill: $colorHover
+		.region:hover
+			path
+				fill: $colorHover
 	//&.region::v-deep svg 
 		.region
 			transform: translate(-10%, 0)
