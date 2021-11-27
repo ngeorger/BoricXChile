@@ -1,6 +1,6 @@
 <template lang="pug">
 .mapa(:class="zoom")
-	UnSVG.territorio(ref="unSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
+	UnSVG.territorio(ref="unSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="`modo-${zoom}`" @listo="iniciar")
 </template>
 <script>
 function encontrarCentro (nodo) {
@@ -173,54 +173,47 @@ $colorActivaExacta: #E76B74
 .unSVG::v-deep 
 	svg
 		height: 100%
-		display: block
-		transition: transform .2s ease 
 		g,
 		path
 			pointer-events: none
 			fill: $colorSemitransparente
+		#pais
+			transition: transform .2s ease 
 
 		.region.activa path,
 		.provincia.activa path,
 		.comuna.activa
 			fill: $colorSemitransparente
 			pointer-events: none
-
-		.region.activa.exacta path,
-		.provincia.activa.exacta path,
-		.comuna.activa.exacta
-			fill: $colorActivaExacta
-			pointer-events: all
 			
 .mapa
 	background-color: #eee
-	&.pais::v-deep svg
+	&.modo-pais::v-deep svg
 		path
 			fill: $colorSemitransparente
 			pointer-events: all
 		.region:hover
 			path
 				fill: $colorHover
-	//&.region::v-deep svg 
-		.region
-			transform: translate(-10%, 0)
-	//&.provincia::v-deep svg
-		.region
-			transform: translate(-40%, 0)
-		.provincia
-			transform: translate(-10%, 0)
-		.provincia.activa > path:hover
-			fill: $colorHover
-	//&.comuna::v-deep  svg
-		.region
-			transform: translate(-80%, 0)
-		.provincia
-			transform: translate(-40%, 0)
-		.comuna
-			transform: translate(-10%, 0)
-		.comuna.activa
-			fill: $colorHover
-
+	&.modo-region::v-deep svg 
+		.region.activa 
+			.provincia:hover
+				path
+					fill: $colorHover
+			path
+				fill: $colorActivaExacta
+				pointer-events: all
+	&.modo-provincia::v-deep svg 
+		.provincia.activa 
+			.comuna:hover
+				fill: $colorHover
+			path
+				fill: $colorActivaExacta
+				pointer-events: all
+	&.modo-comuna::v-deep svg 
+		.comuna.activa 
+			fill: $colorActivaExacta
+			pointer-events: all
 
 // .region.activa
 
