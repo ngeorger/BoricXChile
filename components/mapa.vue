@@ -1,6 +1,7 @@
 <template lang="pug">
-.mapa
-	UnSVG(ref="unSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
+.mapa(:class="zoom")
+	UnSVG.tierra(ref="trasSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
+	UnSVG.territorio(ref="unSVG" tipo="mapa" @clickSVG="detectarTerritorio" :class="zoom" @listo="iniciar")
 </template>
 <script>
 function centroPropio (nodo) {
@@ -18,9 +19,22 @@ function diffCentroParent (nodo) {
 
 	const nodoBBox = nodo.getBBox()
 	const nodoCentro = {x:nodoBBox.x + (nodoBBox.width / 2), y:  nodoBBox.y + (nodoBBox.height / 2)}
-	const diffCentros = {x: parentCentro.x - nodoCentro.x, y: parentCentro.y - nodoCentro.y}
+	const diffCentros = {x: (parentCentro.x - nodoCentro.x), y: parentCentro.y - nodoCentro.y}
 	return Object.values(diffCentros).map(v => `${v}px`).join(', ')
 }
+
+// eslint-disable-next-line
+function escalarSegunParent (nodo, elSVG) {
+	console.log('escalarSegunParent', nodo.id)
+	const viewportBBox = { x: 0, y: 0, width: 4009, height: 8717}
+	const nodoBBox = nodo.getBBox()
+	const parentBBox = nodo.parentNode.getBBox()
+
+	const escalaContain = Math.min(parentBBox.width / Math.min(nodoBBox.width, viewportBBox.width), parentBBox.height / Math.min(nodoBBox.height, viewportBBox.height))
+
+	return escalaContain
+}
+
 export default {
 	props: {
 		zoom: {
@@ -93,10 +107,11 @@ export default {
 						region.classList.remove("exacta")
 					}
 					const traslacion =  diffCentroParent(region)
-					region.style.transform = `translate(${traslacion}) scale(2)`
+					region.style.transform = `translate(${traslacion}) scale(${escalarSegunParent(region, elSVG)})`
+					// region.style.transform = `translate(${traslacion}) scale(${escalarSegunSVG(region, elSVG)})`
 				} else {
 					region.classList.remove("activa", "exacta")
-					region.style.transform = 'none'
+					region.style.transform = null
 				}
 				_.forEach(region.children, provincia => {
 					if (provincia.isEqualNode(nodoProvincia)) {
@@ -105,11 +120,12 @@ export default {
 							provincia.classList.add("activa")
 							provincia.classList.remove("exacta")
 						}
-						const traslacion =  diffCentroParent(provincia)
-						provincia.style.transform = `translate(${traslacion}) scale(2)`
+						const traslacion = diffCentroParent(provincia)
+						provincia.style.transform = `translate(${traslacion}) scale(${escalarSegunParent(provincia, elSVG)})`
+						// provincia.style.transform = `translate(${traslacion}) scale(${escalarSegunSVG(provincia, elSVG)})`
 					} else {
 						provincia.classList.remove("activa", "exacta")
-						provincia.style.transform = 'none'
+						provincia.style.transform = null
 					}
 					_.forEach(provincia.children, comuna => {
 						if (comuna.isEqualNode(nodoComuna)) {
@@ -119,10 +135,11 @@ export default {
 								comuna.classList.remove("exacta")
 							}
 							const traslacion =  diffCentroParent(comuna)
-							comuna.style.transform = `translate(${traslacion}) scale(2)`
+							comuna.style.transform = `translate(${traslacion}) scale(${escalarSegunParent(comuna, elSVG)})`
+							// comuna.style.transform = `translate(${traslacion}) scale(${escalarSegunSVG(comuna, elSVG)})`
 						} else {
 							comuna.classList.remove("activa", "exacta")
-							comuna.style.transform = 'none'
+							comuna.style.transform = null
 						}
 					})
 				})
@@ -145,24 +162,34 @@ export default {
 $colorBase: #585B56
 $colorImpar: #585B56
 $colorPar: #585B56
-$colorSemitransparente: transparentize($colorBase, .5)
+$colorSemitransparente: var(--colorSemitransparente)
 $colorHover: #937D64
 $colorActiva: #E76B74
 $colorActivaExacta: #E76B74
 .mapa
 	max-height: 100vh
+	position: relative
+	--colorSemitransparente: rgba(81, 96, 71, .15)
 	.unSVG
 		height: 100%
+	.tierra
+		position: absolute
+		top: 0
+		left: 0
+		right: 0
+		bottom: 0
+		--colorSemitransparente: hsl(25deg 29% 36% / 15%)
 .unSVG::v-deep 
 	svg
 		height: 100%
 		display: block
+		transition: transform .2s ease 
 		g,
 		path
-			transition: transform .2s ease
+			transition: transform .2s ease, transformOrigin .2s linear, transform-origin .2s linear
 			transform: translate(0,0) scale(1)
 			pointer-events: none
-			fill: transparentize($colorBase, .8)
+			fill: $colorSemitransparente
 
 		.region.activa path,
 		.provincia.activa path,
@@ -176,7 +203,9 @@ $colorActivaExacta: #E76B74
 			fill: $colorActivaExacta
 			pointer-events: all
 			
-	&.pais svg
+.mapa
+	background-color: #eee
+	&.pais::v-deep svg
 		path
 			fill: $colorSemitransparente
 			pointer-events: all
@@ -184,20 +213,24 @@ $colorActivaExacta: #E76B74
 			&:hover
 				path
 					fill: $colorHover
-	&.region svg
-		> g:not(.activa)
-			&:hover
-				path
-					fill: $colorHover
-		> g.activa > g:hover
-			path
-				fill: $colorHover
-	&.provincia svg
-		> g > g:not(.activa)
-			&:hover
-				path
-					fill: $colorHover
-		> g > g.activa > path:hover
+	//&.region::v-deep svg 
+		.region
+			transform: translate(-10%, 0)
+	//&.provincia::v-deep svg
+		.region
+			transform: translate(-40%, 0)
+		.provincia
+			transform: translate(-10%, 0)
+		.provincia.activa > path:hover
+			fill: $colorHover
+	//&.comuna::v-deep  svg
+		.region
+			transform: translate(-80%, 0)
+		.provincia
+			transform: translate(-40%, 0)
+		.comuna
+			transform: translate(-10%, 0)
+		.comuna.activa
 			fill: $colorHover
 
 
